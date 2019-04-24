@@ -77,6 +77,28 @@
                 else if( tag=="CHECKPOINT"){
                     state = story.state.ToJson()
                     localStorage.setItem('storyState', state)
+                    var storySoFar = storyContainer.cloneNode(deep=true);
+                    storySoFarElements = storyContainer.cloneNode(deep=true).getElementsByTagName('p')
+
+                    while (storySoFar.firstChild) {
+                        storySoFar.removeChild(storySoFar.firstChild);
+                    }
+                    // Create paragraph element (initially hidden)
+                    var paragraphElement = document.createElement('p');
+                    paragraphElement.innerHTML = paragraphText;
+
+                    // Add any custom classes derived from ink tags
+                    for(var i=0; i<customClasses.length; i++)
+                        paragraphElement.classList.add(customClasses[i]);
+                    while (storySoFarElements.length > 0) {
+                        element = storySoFarElements[0]
+                        element.classList.add("hide");
+                        element.classList.remove("hide")
+                        storySoFar.appendChild(element);
+                    }
+                    storySoFar.appendChild(paragraphElement);
+
+                    localStorage.setItem('storySoFar', JSON.stringify(storySoFar.innerHTML))
                 }
 
                 else if(tag == "LOAD_CHECKPOINT"){
@@ -85,6 +107,18 @@
                     if(state!=""){
                         story.state.LoadJson(state)
                     }
+
+                    var storySoFar = localStorage.getItem('storySoFar')||'';
+
+                    if(storySoFar!=''){
+                        var storySoFarhtml= JSON.parse(storySoFar)
+                        var soFarElement = document.createElement('p');
+                        soFarElement.innerHTML = storySoFarhtml;
+                        storyContainer.appendChild(soFarElement);
+                        showAfter(delay, soFarElement);
+                        delay += 200.0
+                    }
+
                 }
 
                 else if(tag == "CLEAR_CHECKPOINT"){
@@ -109,7 +143,9 @@
             // Create paragraph element (initially hidden)
             var paragraphElement = document.createElement('p');
             paragraphElement.innerHTML = paragraphText;
+            paragraphElement.classList.remove("hide")
             storyContainer.appendChild(paragraphElement);
+
 
             // Add any custom classes derived from ink tags
             for(var i=0; i<customClasses.length; i++)
